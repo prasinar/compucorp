@@ -1,0 +1,5 @@
+Task 2
+  
+  -Databases for Task 2 are in databases folder. ('localhost',['compucorp','civicrm'],'root','')
+  -Administrator login (user:admin,pass:admin)
+  -Page link http://localhost:8080/work/compucorp/task2/civicrm/a/#/aboutme
