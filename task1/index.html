@@ -1,0 +1,231 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-sanitize.js"></script>
+		<style>
+			@import url('https://fonts.googleapis.com/css?family=Raleway:300,400,700&subset=latin-ext');
+
+			body
+			{
+				font-family: Raleway;
+				margin: 0px;
+			}
+			h1
+			{
+				text-align: center;
+				text-transform: uppercase;
+				color: #2C3E50;
+				font-weight: 300;
+			}
+
+			#message
+			{
+				background-color: #4183D7;
+				color: white;
+				padding: 25px;
+				text-align: center;
+				font-size: 36px;
+				font-weight: 700;
+			}
+			#message span
+			{
+				color: #2C3E50;
+			}
+
+			#top
+			{
+				background-color: #4183D7;
+				padding: 25px;
+				text-align: center;
+				font-size: 36px;
+				font-weight: 700;
+			}
+			#top input[type="text"]
+			{
+				font-family: Raleway;
+				font-size: 18px;
+				padding: 10px 20px 10px 20px;
+				margin: 15px;
+				width: 210px;
+				color: #2C3E50;
+				outline: none;
+			}
+			#top input[type="button"]
+			{
+				font-family: Raleway;
+				background-color: #4183D7;
+				color: white;
+				border: 2px solid white;
+				font-size: 18px;
+				padding: 10px 20px 10px 20px;
+				margin: 15px;
+			}
+			#top input[type="button"]:hover
+			{
+				background-color: white;
+				color: #4183D7;
+				cursor: pointer;
+			}
+
+			#main
+			{
+				color: #2C3E50;
+				//text-align: center;
+				font-size: 24px;
+				padding: 100px;
+				width: 50%;
+				margin-left: auto;
+				margin-right: auto;
+			}
+		</style>
+	</head>
+	<body>
+		<div ng-app="app" ng-controller="controller">
+			<div id="message" ng-bind-html="message" ng-show="messageShow"></div>
+			<div id="top" ng-show="topShow">
+				<div ng-show="yesNoButtonsShow">
+					<input type="button" value="Yes, of course!" ng-click="saidYes()" />
+					<input type="button" value="Sorry, but no." ng-click="saidNo()" />
+				</div>
+				<div ng-show="searchFormShow">
+					<input type="text" placeholder="Enter country or zip code" ng-model="location" />
+					<input type="button" value="See weather" ng-click="seeWeather()" />
+				</div>
+			</div>
+			<h1 ng-bind-html="weather"></h1>
+			<table id="main" ng-show="mainShow">
+				<tr>
+					<td>Current temperature</td>
+					<td ng-bind="currtemp"></td>
+				</tr>
+				<tr>
+					<td >Minimal temperature</td>
+					<td ng-bind="mintemp"></td>
+				</tr>
+				<tr>
+					<td>Maximum temperature</td>
+					<td ng-bind="maxtemp"></td>
+				</tr>
+				<tr>
+					<td>Pressure</td>
+					<td ng-bind="pressure"></td>
+				</tr>
+				<tr>
+					<td>Humidity</td>
+					<td ng-bind="humidity"></td>
+				</tr>
+				<tr>
+					<td>Cloudiness</td>
+					<td ng-bind="clouds"></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+				</tr>
+			</table>
+		</div>
+		<script>
+			(function() {
+				var app = angular.module("app", ['ngSanitize']);
+
+				//var message = document.getElementById("message");
+				app.controller("controller", function($scope, $http) {
+					$scope.message="Would you give us permission to access your location?";
+					$scope.messageShow=true;
+					$scope.yesNoButtonsShow=true;
+					$scope.topShow=true;
+					$scope.mainShow=false;
+					$scope.saidYes = function() {
+						$scope.message="Acquiring information...";
+						$scope.yesNoButtonsShow=false;
+						$scope.topShow=false;
+						getLocation();
+						$scope.mainShow=true;
+					}
+					$scope.saidNo = function() {
+						$scope.messageShow=false;
+						$scope.yesNoButtonsShow=false;
+						$scope.searchFormShow=true;
+					}
+					$scope.seeWeather = function() {
+						$scope.message="Acquiring information...";
+						$scope.messageShow=true;
+						$scope.topShow=false;
+						if (isNaN($scope.location))
+						{
+							$http.get("http://api.openweathermap.org/data/2.5/find?q="+$scope.location+"&units=metric&type=like&APPID=71d17000e5ffe3100da7f1b8a7da36cb").then(function(response) {
+								console.log(response.data);
+						        $scope.currtemp = response.data.list[0].main.temp+" °C";
+						        $scope.mintemp = response.data.list[0].main.temp_min+" °C";
+						        $scope.maxtemp = response.data.list[0].main.temp_max+" °C";
+						        $scope.pressure = response.data.list[0].main.pressure+" hpa";
+						        $scope.humidity = response.data.list[0].main.humidity+"%";
+						        $scope.weather = "<img src='http://openweathermap.org/img/w/"+response.data.list[0].weather[0].icon+".png' />"+response.data.list[0].weather[0].description;
+						        $scope.clouds = response.data.list[0].clouds.all+"%";
+								$scope.message="You can see the current weather in <span>"+response.data.list[0].name+"</span>";
+								$scope.mainShow=true;
+							});
+						}
+						else
+						{
+							$http.get("http://api.openweathermap.org/data/2.5/weather?zip="+$scope.location+"&units=metric&APPID=71d17000e5ffe3100da7f1b8a7da36cb").then(function(response) {
+								console.log(response.data);
+						        $scope.currtemp = response.data.main.temp+" °C";
+						        $scope.mintemp = response.data.main.temp_min+" °C";
+						        $scope.maxtemp = response.data.main.temp_max+" °C";
+						        $scope.pressure = response.data.main.pressure+" hpa";
+						        $scope.humidity = response.data.main.humidity+"%";
+						        $scope.weather = "<img src='http://openweathermap.org/img/w/"+response.data.weather[0].icon+".png' />"+response.data.weather[0].description;
+						        $scope.clouds = response.data.clouds.all+"%";
+								$scope.message="You can see the current weather in <span>"+response.data.name+"</span>";
+								$scope.mainShow=true;
+							});
+						}
+						//api.openweathermap.org/data/2.5/weather?zip=94040
+					}
+					function getLocation() {
+					    if (navigator.geolocation) {
+					        navigator.geolocation.getCurrentPosition(showPosition, showError);
+					    } else {
+					        $scope.message = "Geolocation is not supported by this browser.";
+					    }
+					}
+
+					function showPosition(position) {
+		    			$http.get("http://api.openweathermap.org/data/2.5/weather?lat="+position.coords.latitude+"&lon="+position.coords.longitude+
+		    				"&units=metric&APPID=71d17000e5ffe3100da7f1b8a7da36cb").then(function(response) {
+		    					console.log(response.data);
+						        $scope.currtemp = response.data.main.temp+" °C";
+						        $scope.mintemp = response.data.main.temp_min+" °C";
+						        $scope.maxtemp = response.data.main.temp_max+" °C";
+						        $scope.pressure = response.data.main.pressure+" hpa";
+						        $scope.humidity = response.data.main.humidity+"%";
+						        $scope.weather = "<img src='http://openweathermap.org/img/w/"+response.data.weather[0].icon+".png' />"+response.data.weather[0].description;
+						        $scope.clouds = response.data.clouds.all+"%";
+								$scope.message="You can see the current weather in <span>"+response.data.name+"</span>";
+						});
+		    		}
+
+					function showError(error) {
+						switch(error.code) {
+						    case error.PERMISSION_DENIED:
+						        $scope.message = "User denied the request for Geolocation."
+						        break;
+						    case error.POSITION_UNAVAILABLE:
+						        $scope.message = "Location information is unavailable."
+						        break;
+						    case error.TIMEOUT:
+						        $scope.message = "The request to get user location timed out."
+						        break;
+						    case error.UNKNOWN_ERROR:
+						        $scope.message = "An unknown error occurred."
+						        break;
+						}
+					}
+				});
+			})();
+		</script>
+	</body>
+<html>
