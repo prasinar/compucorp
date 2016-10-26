@@ -35,15 +35,8 @@
 			if (isNaN($scope.location))
 			{
 				$http.get("http://api.openweathermap.org/data/2.5/find?q="+$scope.location+"&units=metric&type=like&APPID=71d17000e5ffe3100da7f1b8a7da36cb").then(function(response) {
-					console.log(response.data);
-			        $scope.currtemp = response.data.list[0].main.temp+" °C";
-			        $scope.mintemp = response.data.list[0].main.temp_min+" °C";
-			        $scope.maxtemp = response.data.list[0].main.temp_max+" °C";
-			        $scope.pressure = response.data.list[0].main.pressure+" hpa";
-			        $scope.humidity = response.data.list[0].main.humidity+"%";
-			        $scope.weather = "<img src='http://openweathermap.org/img/w/"+response.data.list[0].weather[0].icon+".png' />"+response.data.list[0].weather[0].description;
-			        $scope.clouds = response.data.list[0].clouds.all+"%";
-					$scope.message="You can see the current weather in <span>"+response.data.list[0].name+"</span>";
+					//console.log(response.data);
+					showWeatherInfo(response.data.list[0]);
 					$scope.mainShow=true;
 				});
 			}
@@ -51,19 +44,23 @@
 			else
 			{
 				$http.get("http://api.openweathermap.org/data/2.5/weather?zip="+$scope.location+"&units=metric&APPID=71d17000e5ffe3100da7f1b8a7da36cb").then(function(response) {
-					console.log(response.data);
-			        $scope.currtemp = response.data.main.temp+" °C";
-			        $scope.mintemp = response.data.main.temp_min+" °C";
-			        $scope.maxtemp = response.data.main.temp_max+" °C";
-			        $scope.pressure = response.data.main.pressure+" hpa";
-			        $scope.humidity = response.data.main.humidity+"%";
-			        $scope.weather = "<img src='http://openweathermap.org/img/w/"+response.data.weather[0].icon+".png' />"+response.data.weather[0].description;
-			        $scope.clouds = response.data.clouds.all+"%";
-					$scope.message="You can see the current weather in <span>"+response.data.name+"</span>";
+					//console.log(response.data);
+			        showWeatherInfo(response.data);
 					$scope.mainShow=true;
 				});
 			}
 			//api.openweathermap.org/data/2.5/weather?zip=94040
+		}
+
+		function showWeatherInfo(data) {
+			$scope.currtemp = data.main.temp+" °C";
+			$scope.mintemp = data.main.temp_min+" °C";
+			$scope.maxtemp = data.main.temp_max+" °C";
+			$scope.pressure = data.main.pressure+" hpa";
+			$scope.humidity = data.main.humidity+"%";
+			$scope.weather = "<img src='http://openweathermap.org/img/w/"+data.weather[0].icon+".png' />"+data.weather[0].description;
+			$scope.clouds = data.clouds.all+"%";
+			$scope.message="You can see the current weather in <span>"+data.name+"</span>";
 		}
 
 		//asking for permission for location
@@ -79,15 +76,8 @@
 		function showPosition(position) {
 			$http.get("http://api.openweathermap.org/data/2.5/weather?lat="+position.coords.latitude+"&lon="+position.coords.longitude+
 		    				"&units=metric&APPID=71d17000e5ffe3100da7f1b8a7da36cb").then(function(response) {
-					console.log(response.data);
-			        $scope.currtemp = response.data.main.temp+" °C";
-			        $scope.mintemp = response.data.main.temp_min+" °C";
-			        $scope.maxtemp = response.data.main.temp_max+" °C";
-			        $scope.pressure = response.data.main.pressure+" hpa";
-			        $scope.humidity = response.data.main.humidity+"%";
-			        $scope.weather = "<img src='http://openweathermap.org/img/w/"+response.data.weather[0].icon+".png' />"+response.data.weather[0].description;
-			        $scope.clouds = response.data.clouds.all+"%";
-					$scope.message="You can see the current weather in <span>"+response.data.name+"</span>";
+					//console.log(response.data);
+			        showWeatherInfo(response.data);
 			});
 		}
 
